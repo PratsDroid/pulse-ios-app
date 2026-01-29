@@ -13,49 +13,45 @@ struct WatchlistView: View {
                 if viewModel.isLoading {
                     LoadingView(message: "Loading watchlist...")
                 } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            // Market Overview
-                            if !viewModel.marketIndices.isEmpty {
-                                marketOverviewSection
-                            }
-                            
-                            // Header
-                            headerView
-                            
-                            // Stock List
-                            LazyVStack(spacing: 12) {
-                                ForEach(viewModel.watchlist.stocks) { stock in
-                                    NavigationLink(value: stock) {
-                                        StockRowView(stock: stock)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                .onDelete(perform: viewModel.removeStock)
-                            }
+                    VStack(spacing: 0) {
+                        // Search Bar
+                        searchBar
                             .padding(.horizontal)
+                            .padding(.top, 8)
+                        
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                // Market Overview
+                                if !viewModel.marketIndices.isEmpty {
+                                    marketOverviewSection
+                                }
+                                
+                                // Header
+                                headerView
+                                
+                                // Stock List
+                                LazyVStack(spacing: 12) {
+                                    ForEach(viewModel.watchlist.stocks) { stock in
+                                        NavigationLink(value: stock) {
+                                            StockRowView(stock: stock)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .onDelete(perform: viewModel.removeStock)
+                                }
+                                .padding(.horizontal)
+                            }
+                            .padding(.top, 12)
                         }
-                        .padding(.top)
-                    }
-                    .refreshable {
-                        await viewModel.refreshStocks()
+                        .refreshable {
+                            await viewModel.refreshStocks()
+                        }
                     }
                 }
             }
-            .navigationTitle("Watchlist")
+            .navigationBarHidden(true)
             .navigationDestination(for: Stock.self) { stock in
                 StockDetailView(stock: stock)
-            }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingSearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.title3)
-                            .foregroundColor(.blue)
-                    }
-                }
             }
             .sheet(isPresented: $showingSearch) {
                 StockSearchView { stock in
@@ -113,6 +109,27 @@ struct WatchlistView: View {
             }
         }
         .padding(.bottom, 8)
+    }
+    
+    private var searchBar: some View {
+        Button {
+            showingSearch = true
+        } label: {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                
+                Text("Search stocks...")
+                    .foregroundColor(.secondary)
+                    .font(.body)
+                
+                Spacer()
+            }
+            .padding(12)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
     }
 }
 
